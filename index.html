@@ -1,111 +1,118 @@
-!DOCTYPE html
-html lang=th
-head
-    meta charset=UTF-8
-    meta name=viewport content=width=device-width, initial-scale=1.0
-    titleระบบศูนย์ควบคุมบอทข้อมูลหลังบ้านtitle
-    !-- ใช้ CSS Framework เพื่อให้หน้าเว็บดูโปรและสวยงามทันที --
-    link href=httpscdnjs.cloudflare.comajaxlibsbootstrap5.3.0cssbootstrap.min.css rel=stylesheet
-    style
-        body { background-color #f4f6f9; font-family 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .card { border none; border-radius 12px; box-shadow 0 4px 6px rgba(0,0,0,0.1); }
-        .btn-update { width 100%; font-weight bold; }
-    style
-head
-body
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบศูนย์ควบคุมบอทข้อมูลหลังบ้าน</title>
+    <!-- เรียกใช้ CSS Framework เพื่อความสวยงาม -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .card { border: none; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .btn-update { width: 100%; font-weight: bold; }
+    </style>
+</head>
+<body>
 
-div class=container py-5
-    div class=text-center mb-5
-        h1 class=fw-bold📊 ระบบศูนย์ควบคุมและอัปเดตข้อมูลh1
-        p class=text-mutedคลิกเพื่อสั่งให้บอทดึงข้อมูลล่าสุดเข้าสู่ Google BigQueryp
-    div
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="fw-bold">📊 ระบบศูนย์ควบคุมและอัปเดตข้อมูล</h1>
+        <p class="text-muted">คลิกเพื่อสั่งให้บอทดึงข้อมูลล่าสุดเข้าสู่ Google BigQuery</p>
+    </div>
 
-    div class=row g-4
-        !-- บอทตัวที่ 1 SKU Stock --
-        div class=col-md-6
-            div class=card p-4 h-100
-                div class=d-flex justify-content-between align-items-center mb-3
-                    h3 class=fw-bold mb-0📦 ข้อมูลสินค้าคงเหลือ (SKU)h3
-                div
-                pสถานะของระบบ span class=badge bg-successพร้อมใช้งานspanp
-                p class=text-muted id=sku-timeกำลังโหลดเวลาอัปเดตล่าสุด...p
-                button class=btn btn-primary btn-update py-2 onclick=runBot('run_data_bot.yml', 'sku-time')⚙️ กดอัปเดต SKU ตอนนี้button
-            div
-        div
+    <div class="row g-4">
+        <!-- บอทตัวที่ 1: SKU Stock -->
+        <div class="col-md-6">
+            <div class="card p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="fw-bold mb-0">📦 ข้อมูลสินค้าคงเหลือ (SKU)</h3>
+                </div>
+                <p>สถานะของระบบ: <span class="badge bg-success">พร้อมใช้งาน</span></p>
+                <p class="text-muted" id="sku-time">กำลังโหลดเวลาอัปเดตล่าสุด...</p>
+                <button class="btn btn-primary btn-update py-2" onclick="runBot('run_data_bot.yml', 'sku-time')">⚙️ กดอัปเดต SKU ตอนนี้</button>
+            </div>
+        </div>
 
-        !-- บอทตัวที่ 2 ยอดขาย (Sales) --
-        div class=col-md-6
-            div class=card p-4 h-100
-                div class=d-flex justify-content-between align-items-center mb-3
-                    h3 class=fw-bold mb-0💰 ข้อมูลยอดขายรายวัน (Sales)h3
-                div
-                pสถานะของระบบ span class=badge bg-successพร้อมใช้งานspanp
-                p class=text-muted id=sales-timeกำลังโหลดเวลาอัปเดตล่าสุด...p
-                button class=btn btn-success btn-update py-2 onclick=runBot('run_sales_bot.yml', 'sales-time')💸 กดอัปเดตยอดขายตอนนี้button
-            div
-        div
-    div
-div
+        <!-- บอทตัวที่ 2: ยอดขาย (Sales) -->
+        <div class="col-md-6">
+            <div class="card p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="fw-bold mb-0">💰 ข้อมูลยอดขายรายวัน (Sales)</h3>
+                </div>
+                <p>สถานะ of ระบบ: <span class="badge bg-success">พร้อมใช้งาน</span></p>
+                <p class="text-muted" id="sales-time">กำลังโหลดเวลาอัปเดตล่าสุด...</p>
+                <button class="btn btn-success btn-update py-2" onclick="runBot('run_sales_bot.yml', 'sales-time')">💸 กดอัปเดตยอดขายตอนนี้</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-script
-     🛑 ใส่ข้อมูลของคุณตรงนี้
+<script>
+    // 🛑 ข้อมูลระบบของคุณ
     const GITHUB_USERNAME = "pet1486-sys";
     const GITHUB_REPO = "bot-Actions";
-    // 🌟 เปลี่ยนให้เป็นกล่องรับค่าแทนการกรอกรหัสทิ้งไว้ในไฟล์
-    const GITHUB_TOKEN = prompt("กรุณาใส่ GitHub Personal Access Token ของคุณเพื่อยืนยันตัวตน:");
 
-     ฟังก์ชันสั่งให้ GitHub Actions ทำงานเมื่อกดปุ่ม
+    // ฟังก์ชันสั่งให้ GitHub Actions ทำงานเมื่อกดปุ่ม
     function runBot(workflowFile, elementId) {
-        const url = `httpsapi.github.comrepos${GITHUB_USERNAME}${GITHUB_REPO}actionsworkflows${workflowFile}dispatches`;
+        // ถามรหัสผ่านทุกครั้งที่กดปุ่ม เพื่อความปลอดภัยสูงสุด
+        const GITHUB_TOKEN = prompt("กรุณาใส่ GitHub Personal Access Token ของคุณเพื่อยืนยันตัวตน:");
         
-        fetch(url, {
-            method 'POST',
-            headers {
-                'Authorization' `token ${GITHUB_TOKEN}`,
-                'Accept' 'applicationvnd.github.v3+json',
-                'Content-Type' 'applicationjson'
-            },
-            body JSON.stringify({ ref 'main' })
-        })
-        .then(response = {
-            if (response.status === 204) {
-                alert(🚀 สั่งบอทรันสำเร็จแล้ว! ข้อมูลจะอัปเดตเข้า BigQuery ภายใน 2-3 นาทีครับ);
-                document.getElementById(elementId).innerText = กำลังดำเนินการรันบอทล่าสุด...;
-            } else {
-                alert(เกิดข้อผิดพลาดในการสั่งรันบอท);
-            }
-        })
-        .catch(error = console.error('Error', error));
-    }
+        if (!GITHUB_TOKEN) {
+            alert("⚠️ ปฏิเสธการทำงาน: จำเป็นต้องกรอก Token ครับ");
+            return;
+        }
 
-     ฟังก์ชันดึงเวลาที่บอทรันสำเร็จล่าสุดจาก GitHub History
-    function fetchLastRunTime(workflowFile, elementId) {
-        const url = `httpsapi.github.comrepos${GITHUB_USERNAME}${GITHUB_REPO}actionsworkflows${workflowFile}runsstatus=success&per_page=1`;
+        const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/actions/workflows/${workflowFile}/dispatches`;
         
         fetch(url, {
-            headers { 'Authorization' `token ${GITHUB_TOKEN}` }
+            method: 'POST',
+            headers: {
+                'Authorization': `token ${GITHUB_TOKEN}`,
+                'Accept': 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ ref: 'main' })
         })
-        .then(response = response.json())
-        .then(data = {
-            if (data.workflow_runs && data.workflow_runs.length  0) {
-                const lastRun = new Date(data.workflow_runs[0].updated_at);
-                 แปลงเวลาให้เป็นรูปแบบไทย GMT+7
-                const formattedDate = lastRun.toLocaleString('th-TH', { timeZone 'AsiaBangkok' });
-                document.getElementById(elementId).innerText = `รันสำเร็จล่าสุดเมื่อ ${formattedDate}`;
+        .then(response => {
+            if (response.status === 204) {
+                alert("🚀 สั่งบอทรันสำเร็จแล้ว! ข้อมูลจะอัปเดตเข้า BigQuery ภายใน 2-3 นาทีครับ");
+                document.getElementById(elementId).innerText = "กำลังดำเนินการรันบอทล่าสุด...";
             } else {
-                document.getElementById(elementId).innerText = ยังไม่มีประวัติการรันที่สำเร็จ;
+                alert("เกิดข้อผิดพลาด: รหัส Token อาจจะผิด หรือสิทธิ์ไม่ถูกต้อง");
             }
         })
-        .catch(error = {
-            document.getElementById(elementId).innerText = ไม่สามารถดึงข้อมูลเวลาได้;
+        .catch(error => {
+            console.error('Error:', error);
+            alert("ไม่สามารถเชื่อมต่อระบบได้");
         });
     }
 
-     เรียกโหลดเวลาอัปเดตล่าสุดทันทีที่เปิดหน้าเว็บ
+    // ฟังก์ชันดึงเวลาที่บอทรันล่าสุด
+    function fetchLastRunTime(workflowFile, elementId) {
+        // สำหรับการดูเวลาอัปเดตล่าสุด เราดึงแบบสาธารณะได้เลยโดยไม่ต้องใช้ Token ครับ
+        const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/actions/workflows/${workflowFile}/runs?status=success&per_page=1`;
+        
+        fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            if (data.workflow_runs && data.workflow_runs.length > 0) {
+                const lastRun = new Date(data.workflow_runs[0].updated_at);
+                const formattedDate = lastRun.toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' });
+                document.getElementById(elementId).innerText = `รันสำเร็จล่าสุดเมื่อ: ${formattedDate}`;
+            } else {
+                document.getElementById(elementId).innerText = "ยังไม่มีประวัติการรันที่สำเร็จ";
+            }
+        })
+        .catch(error => {
+            document.getElementById(elementId).innerText = "รอการเปิดใช้งานประวัติระบบ...";
+        });
+    }
+
+    // เรียกทำงานดึงเวลาทันทีก่อนเปิดหน้าเว็บ
     window.onload = function() {
         fetchLastRunTime('run_data_bot.yml', 'sku-time');
         fetchLastRunTime('run_sales_bot.yml', 'sales-time');
     }
-script
-body
-html
+</script>
+</body>
+</html>
