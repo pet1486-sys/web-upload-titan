@@ -1,0 +1,110 @@
+!DOCTYPE html
+html lang=th
+head
+    meta charset=UTF-8
+    meta name=viewport content=width=device-width, initial-scale=1.0
+    titleระบบศูนย์ควบคุมบอทข้อมูลหลังบ้านtitle
+    !-- ใช้ CSS Framework เพื่อให้หน้าเว็บดูโปรและสวยงามทันที --
+    link href=httpscdnjs.cloudflare.comajaxlibsbootstrap5.3.0cssbootstrap.min.css rel=stylesheet
+    style
+        body { background-color #f4f6f9; font-family 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .card { border none; border-radius 12px; box-shadow 0 4px 6px rgba(0,0,0,0.1); }
+        .btn-update { width 100%; font-weight bold; }
+    style
+head
+body
+
+div class=container py-5
+    div class=text-center mb-5
+        h1 class=fw-bold📊 ระบบศูนย์ควบคุมและอัปเดตข้อมูลh1
+        p class=text-mutedคลิกเพื่อสั่งให้บอทดึงข้อมูลล่าสุดเข้าสู่ Google BigQueryp
+    div
+
+    div class=row g-4
+        !-- บอทตัวที่ 1 SKU Stock --
+        div class=col-md-6
+            div class=card p-4 h-100
+                div class=d-flex justify-content-between align-items-center mb-3
+                    h3 class=fw-bold mb-0📦 ข้อมูลสินค้าคงเหลือ (SKU)h3
+                div
+                pสถานะของระบบ span class=badge bg-successพร้อมใช้งานspanp
+                p class=text-muted id=sku-timeกำลังโหลดเวลาอัปเดตล่าสุด...p
+                button class=btn btn-primary btn-update py-2 onclick=runBot('run_data_bot.yml', 'sku-time')⚙️ กดอัปเดต SKU ตอนนี้button
+            div
+        div
+
+        !-- บอทตัวที่ 2 ยอดขาย (Sales) --
+        div class=col-md-6
+            div class=card p-4 h-100
+                div class=d-flex justify-content-between align-items-center mb-3
+                    h3 class=fw-bold mb-0💰 ข้อมูลยอดขายรายวัน (Sales)h3
+                div
+                pสถานะของระบบ span class=badge bg-successพร้อมใช้งานspanp
+                p class=text-muted id=sales-timeกำลังโหลดเวลาอัปเดตล่าสุด...p
+                button class=btn btn-success btn-update py-2 onclick=runBot('run_sales_bot.yml', 'sales-time')💸 กดอัปเดตยอดขายตอนนี้button
+            div
+        div
+    div
+div
+
+script
+     🛑 ใส่ข้อมูลของคุณตรงนี้
+    const GITHUB_USERNAME = ชื่อ_GitHub_ของคุณ;
+    const GITHUB_REPO = ชื่อ_Repository_ของคุณ;
+    const GITHUB_TOKEN = รหัส_GITHUB_TOKEN_ที่สร้างจากขั้นตอนก่อนหน้า;  เก็บไว้ใช้ส่วนตัว ห้ามแชร์หน้านี้ให้คนอื่นเห็นนะครับ
+
+     ฟังก์ชันสั่งให้ GitHub Actions ทำงานเมื่อกดปุ่ม
+    function runBot(workflowFile, elementId) {
+        const url = `httpsapi.github.comrepos${GITHUB_USERNAME}${GITHUB_REPO}actionsworkflows${workflowFile}dispatches`;
+        
+        fetch(url, {
+            method 'POST',
+            headers {
+                'Authorization' `token ${GITHUB_TOKEN}`,
+                'Accept' 'applicationvnd.github.v3+json',
+                'Content-Type' 'applicationjson'
+            },
+            body JSON.stringify({ ref 'main' })
+        })
+        .then(response = {
+            if (response.status === 204) {
+                alert(🚀 สั่งบอทรันสำเร็จแล้ว! ข้อมูลจะอัปเดตเข้า BigQuery ภายใน 2-3 นาทีครับ);
+                document.getElementById(elementId).innerText = กำลังดำเนินการรันบอทล่าสุด...;
+            } else {
+                alert(เกิดข้อผิดพลาดในการสั่งรันบอท);
+            }
+        })
+        .catch(error = console.error('Error', error));
+    }
+
+     ฟังก์ชันดึงเวลาที่บอทรันสำเร็จล่าสุดจาก GitHub History
+    function fetchLastRunTime(workflowFile, elementId) {
+        const url = `httpsapi.github.comrepos${GITHUB_USERNAME}${GITHUB_REPO}actionsworkflows${workflowFile}runsstatus=success&per_page=1`;
+        
+        fetch(url, {
+            headers { 'Authorization' `token ${GITHUB_TOKEN}` }
+        })
+        .then(response = response.json())
+        .then(data = {
+            if (data.workflow_runs && data.workflow_runs.length  0) {
+                const lastRun = new Date(data.workflow_runs[0].updated_at);
+                 แปลงเวลาให้เป็นรูปแบบไทย GMT+7
+                const formattedDate = lastRun.toLocaleString('th-TH', { timeZone 'AsiaBangkok' });
+                document.getElementById(elementId).innerText = `รันสำเร็จล่าสุดเมื่อ ${formattedDate}`;
+            } else {
+                document.getElementById(elementId).innerText = ยังไม่มีประวัติการรันที่สำเร็จ;
+            }
+        })
+        .catch(error = {
+            document.getElementById(elementId).innerText = ไม่สามารถดึงข้อมูลเวลาได้;
+        });
+    }
+
+     เรียกโหลดเวลาอัปเดตล่าสุดทันทีที่เปิดหน้าเว็บ
+    window.onload = function() {
+        fetchLastRunTime('run_data_bot.yml', 'sku-time');
+        fetchLastRunTime('run_sales_bot.yml', 'sales-time');
+    }
+script
+body
+html
