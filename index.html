@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ระบบศูนย์ควบคุมบอทข้อมูลหลังบ้าน</title>
-    <!-- เรียกใช้ CSS Framework เพื่อความสวยงาม -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -39,7 +38,7 @@
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h3 class="fw-bold mb-0">💰 ข้อมูลยอดขายรายวัน (Sales)</h3>
                 </div>
-                <p>สถานะ of ระบบ: <span class="badge bg-success">พร้อมใช้งาน</span></p>
+                <p>สถานะของระบบ: <span class="badge bg-success">พร้อมใช้งาน</span></p>
                 <p class="text-muted" id="sales-time">กำลังโหลดเวลาอัปเดตล่าสุด...</p>
                 <button class="btn btn-success btn-update py-2" onclick="runBot('run_sales_bot.yml', 'sales-time')">💸 กดอัปเดตยอดขายตอนนี้</button>
             </div>
@@ -48,16 +47,22 @@
 </div>
 
 <script>
-    // 🛑 ข้อมูลระบบของคุณ
     const GITHUB_USERNAME = "pet1486-sys";
     const GITHUB_REPO = "bot-Actions";
+    let SAVED_TOKEN = ""; // ตัวแปรสำหรับจำรหัส Token ชั่วคราวในเบราว์เซอร์
+
+    // ฟังก์ชันถามรหัส Token (ถ้ายังไม่มีการกรอก)
+    function checkToken() {
+        if (!SAVED_TOKEN) {
+            SAVED_TOKEN = prompt("🔒 กรุณาใส่ GitHub Personal Access Token ของคุณเพื่อดึงข้อมูลหรือสั่งงานระบบ:");
+        }
+        return SAVED_TOKEN;
+    }
 
     // ฟังก์ชันสั่งให้ GitHub Actions ทำงานเมื่อกดปุ่ม
     function runBot(workflowFile, elementId) {
-        // ถามรหัสผ่านทุกครั้งที่กดปุ่ม เพื่อความปลอดภัยสูงสุด
-        const GITHUB_TOKEN = prompt("กรุณาใส่ GitHub Personal Access Token ของคุณเพื่อยืนยันตัวตน:");
-        
-        if (!GITHUB_TOKEN) {
+        const token = checkToken();
+        if (!token) {
             alert("⚠️ ปฏิเสธการทำงาน: จำเป็นต้องกรอก Token ครับ");
             return;
         }
@@ -67,7 +72,7 @@
         fetch(url, {
             method: 'POST',
             headers: {
-                'Authorization': `token ${GITHUB_TOKEN}`,
+                'Authorization': `token ${token}`,
                 'Accept': 'application/vnd.github.v3+json',
                 'Content-Type': 'application/json'
             },
@@ -77,22 +82,29 @@
             if (response.status === 204) {
                 alert("🚀 สั่งบอทรันสำเร็จแล้ว! ข้อมูลจะอัปเดตเข้า BigQuery ภายใน 2-3 นาทีครับ");
                 document.getElementById(elementId).innerText = "กำลังดำเนินการรันบอทล่าสุด...";
+                // โหลดเวลาใหม่หลังจากสั่งรันไปสักพัก
+                setTimeout(() => fetchLastRunTime(workflowFile, elementId), 10000);
             } else {
                 alert("เกิดข้อผิดพลาด: รหัส Token อาจจะผิด หรือสิทธิ์ไม่ถูกต้อง");
+                SAVED_TOKEN = ""; // ล้างค่าเผื่อกรอกผิด
             }
         })
-        .catch(error => {
-            console.error('Error:', error);
-            alert("ไม่สามารถเชื่อมต่อระบบได้");
-        });
+        .catch(error => console.error('Error:', error));
     }
 
-    // ฟังก์ชันดึงเวลาที่บอทรันล่าสุด
+    // ฟังก์ชันดึงเวลาที่บอทรันล่าสุด (ปรับปรุงให้รองรับ Repo Private)
     function fetchLastRunTime(workflowFile, elementId) {
-        // สำหรับการดูเวลาอัปเดตล่าสุด เราดึงแบบสาธารณะได้เลยโดยไม่ต้องใช้ Token ครับ
+        const token = checkToken();
+        if (!token) {
+            document.getElementById(elementId).innerText = "กรุณากรอก Token เพื่อดูเวลาอัปเดต";
+            return;
+        }
+
         const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/actions/workflows/${workflowFile}/runs?status=success&per_page=1`;
         
-        fetch(url)
+        fetch(url, {
+            headers: { 'Authorization': `token ${token}` }
+        })
         .then(response => response.json())
         .then(data => {
             if (data.workflow_runs && data.workflow_runs.length > 0) {
@@ -104,11 +116,11 @@
             }
         })
         .catch(error => {
-            document.getElementById(elementId).innerText = "รอการเปิดใช้งานประวัติระบบ...";
+            document.getElementById(elementId).innerText = "ไม่สามารถดึงข้อมูลเวลาได้";
         });
     }
 
-    // เรียกทำงานดึงเวลาทันทีก่อนเปิดหน้าเว็บ
+    // เรียกทำงานดึงเวลาทันทีเมื่อโหลดหน้าเว็บ
     window.onload = function() {
         fetchLastRunTime('run_data_bot.yml', 'sku-time');
         fetchLastRunTime('run_sales_bot.yml', 'sales-time');
