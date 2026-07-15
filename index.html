@@ -49,9 +49,10 @@ div
 
 script
      🛑 ใส่ข้อมูลของคุณตรงนี้
-    const GITHUB_USERNAME = ชื่อ_GitHub_ของคุณ;
-    const GITHUB_REPO = ชื่อ_Repository_ของคุณ;
-    const GITHUB_TOKEN = รหัส_GITHUB_TOKEN_ที่สร้างจากขั้นตอนก่อนหน้า;  เก็บไว้ใช้ส่วนตัว ห้ามแชร์หน้านี้ให้คนอื่นเห็นนะครับ
+    const GITHUB_USERNAME = "pet1486-sys";
+    const GITHUB_REPO = "bot-Actions";
+    // 🌟 เปลี่ยนให้เป็นกล่องรับค่าแทนการกรอกรหัสทิ้งไว้ในไฟล์
+    const GITHUB_TOKEN = prompt("กรุณาใส่ GitHub Personal Access Token ของคุณเพื่อยืนยันตัวตน:");
 
      ฟังก์ชันสั่งให้ GitHub Actions ทำงานเมื่อกดปุ่ม
     function runBot(workflowFile, elementId) {
