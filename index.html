@@ -22,26 +22,27 @@
         .dot-sku { background-color: #0d6efd; }
         .dot-sales { background-color: #198754; }
         
-        /* สไตล์กำหนดความสูงของโซนปฏิทินย้อนหลัง */
         .calendar-scroll-zone { max-height: 450px; overflow-y: auto; padding-right: 5px; }
     </style>
 </head>
 <body>
 
-<div class="container py-5">
-    <!-- ส่วนจัดการ Token ด้านบนสุดของหน้าเว็บ -->
+<div class="container py-4">
+    <!-- ส่วนจัดการสิทธิ์และแถบวันเวลาสถานะโปรแกรมที่มุมขวาบนสุด -->
     <div class="d-flex justify-content-end mb-4">
-        <div class="token-management d-flex align-items-center gap-2">
-            <span id="token-status" class="text-muted small">🔒 ตรวจสอบสิทธิ์เครื่อง...</span>
-            <button id="btn-clear-token" class="btn btn-outline-danger btn-sm" style="display:none;" onclick="clearToken()">ลบการจำเครื่องนี้</button>
+        <div class="token-management d-flex flex-column align-items-end gap-1">
+            <div class="d-flex align-items-center gap-2">
+                <span id="token-status" class="text-muted small">🔒 ตรวจสอบสิทธิ์เครื่อง...</span>
+                <button id="btn-clear-token" class="btn btn-outline-danger btn-sm" style="display:none;" onclick="clearToken()">ลบการจำเครื่องนี้</button>
+            </div>
+            <div class="text-muted" style="font-size: 0.75rem; text-align: right; line-height: 1.3;">
+                <span id="web-version-info">🛠️ เวอร์ชันแก้ไข: 16 กรกฎาคม 2569</span><br>
+                <span id="web-refresh-time-hub">🔄 อัปเดตข้อมูลระบบล่าสุด: -</span>
+            </div>
         </div>
     </div>
 
-    <div class="text-center mb-5">
-        <h1 class="fw-bold">📊 ระบบศูนย์ควบคุมและอัปเดตข้อมูล</h1>
-        <p class="text-muted">คลิกเพื่อสั่งให้บอทดึงข้อมูลล่าสุดเข้าสู่ Google BigQuery</p>
-    </div>
-
+    <!-- ปุ่มกดอัปเดตข้อมูลทันที -->
     <div class="row g-4 mb-4">
         <!-- บอทตัวที่ 1: SKU Stock -->
         <div class="col-md-6">
@@ -49,7 +50,8 @@
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h3 class="fw-bold mb-0">📦 ข้อมูลสินค้าคงเหลือ (SKU)</h3>
                 </div>
-                <p>สถานะของระบบ: <span class="badge bg-success">พร้อมใช้งาน</span></p>
+                <!-- 🌟 เปลี่ยนจากป้าย Ready เป็นระบบอ่านตารางเวลาจาก YAML -->
+                <p>ตั้งเวลารันอัตโนมัติ: <span class="badge bg-info text-dark" id="sku-schedule">กำลังอ่านตารางเวลาจาก YAML...</span></p>
                 <p class="text-muted" id="sku-time">กำลังโหลดเวลาอัปเดตล่าสุดอัตโนมัติ...</p>
                 <button class="btn btn-primary btn-update py-2" onclick="runBot('run_sku_bot.yml', 'sku-time', 'sku_last_update.txt')">⚙️ กดอัปเดต SKU ตอนนี้</button>
             </div>
@@ -61,7 +63,8 @@
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h3 class="fw-bold mb-0">💰 ข้อมูลยอดขายรายวัน (Sales)</h3>
                 </div>
-                <p>สถานะของระบบ: <span class="badge bg-success">พร้อมใช้งาน</span></p>
+                <!-- 🌟 เปลี่ยนจากป้าย Ready เป็นระบบอ่านตารางเวลาจาก YAML -->
+                <p>ตั้งเวลารันอัตโนมัติ: <span class="badge bg-info text-dark" id="sales-schedule">กำลังอ่านตารางเวลาจาก YAML...</span></p>
                 <p class="text-muted" id="sales-time">กำลังโหลดเวลาอัปเดตล่าสุดอัตโนมัติ...</p>
                 <button class="btn btn-success btn-update py-2" onclick="runBot('run_sales_bot.yml', 'sales-time', 'sales_last_update.txt')">💸 กดอัปเดตยอดขายตอนนี้</button>
             </div>
@@ -70,48 +73,34 @@
 
     <!-- แดชบอร์ดปฏิทินและประวัติ -->
     <div class="row g-4">
-        <!-- ฝั่งซ้าย: ปฏิทินแสดงการอัปเดตแบบเก็บข้อมูลต่อเนื่องย้อนหลังหลายเดือน -->
         <div class="col-lg-5">
             <div class="card p-4 h-100">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h4 class="fw-bold mb-0">🗓️ ประวัติการอัปเดตรายเดือน</h4>
-                </div>
-                <!-- 🌟 แสดงเวลาที่อัปเดตข้อมูลล่าสุดของหน้าเว็บ -->
-                <div class="text-muted small mb-3 text-end" id="web-refresh-time-cal">🔄 อัปเดตหน้าระบบ: -</div>
-                
+                <h4 class="fw-bold mb-3">🗓️ ประวัติการอัปเดตรายเดือน</h4>
                 <div class="d-flex justify-content-center gap-3 mb-3 small fw-bold">
                     <span><span class="dot dot-sku"></span> บอท SKU</span>
                     <span><span class="dot dot-sales"></span> บอท Sales</span>
                 </div>
-                
-                <!-- โซน Scroll สำหรับดูปฏิทินแต่ละเดือนที่ระบบสร้างขึ้นสะสมไว้ -->
                 <div class="calendar-scroll-zone" id="calendar-area">
-                    <p class="text-center text-muted small py-4">กำลังจัดโครงสร้างปฏิทินย้อนหลัง...</p>
+                    <p class="text-center text-muted small py-4">กำลังจัดโครงสร้างปฏิทิน...</p>
                 </div>
             </div>
         </div>
 
-        <!-- ฝั่งขวา: ตารางประวัติ Log การรันที่ส่งข้อมูลเข้า BigQuery สำเร็จเสร็จสิ้นแล้วจริงๆ -->
         <div class="col-lg-7">
             <div class="card p-4 h-100">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h4 class="fw-bold mb-0">📜 บันทึกสำเร็จจริง (BigQuery Success Log)</h4>
-                </div>
-                <!-- 🌟 แสดงเวลาที่อัปเดตข้อมูลล่าสุดของหน้าเว็บ -->
-                <div class="text-muted small mb-3 text-end" id="web-refresh-time-log">🔄 อัปเดตหน้าระบบ: -</div>
-                
-                <div class="table-responsive" style="max-height: 380px; overflow-y: auto;">
+                <h4 class="fw-bold mb-3">📜 บันทึกสำเร็จจริง (BigQuery Success Log)</h4>
+                <div class="table-responsive" style="max-height: 410px; overflow-y: auto;">
                     <table class="table table-hover align-middle">
                         <thead class="table-light">
                             <tr>
                                 <th>ระบบบอท</th>
-                                <th>วัน-เวลาที่ส่งข้อมูลสำเร็จ</th>
+                                <th>วัน-เวลาที่บันทึกข้อมูลสำเร็จ (จริง)</th>
                                 <th>สถานะข้อมูล</th>
                             </tr>
                         </thead>
                         <tbody id="history-log-table">
                             <tr>
-                                <td colspan="3" class="text-center text-muted">กำลังตรวจสอบสิทธิ์และดึงรายงานสำเร็จ...</td>
+                                <td colspan="3" class="text-center text-muted">กำลังดึงความเปลี่ยนแปลงของไฟล์ข้อมูลหลัก...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -181,9 +170,9 @@
         })
         .then(response => {
             if (response.status === 204) {
-                alert("🚀 ส่งคำสั่งรันสำเร็จแล้ว! เมื่อบอทนำข้อมูลเข้า BigQuery สำเร็จ ประวัติจริงจะปรากฏในระบบด้านล่างครับ");
-                document.getElementById(elementId).innerText = "กำลังตรวจสอบสถานะการอัปเดตผ่าน GitHub...";
-                setTimeout(loadActionHistory, 6000); // ดีเลย์เผื่อระบบสร้างคิวงาน
+                alert("🚀 ส่งคำสั่งรันสำเร็จแล้ว! เมื่อบอทเขียนแก้ไขไฟล์ .txt สำเร็จ ระบบจะอัปเดตข้อมูลจริงให้ทันทีครับ");
+                document.getElementById(elementId).innerText = "กำลังรอการตอบกลับและเขียนไฟล์บันทึกความจำ...";
+                setTimeout(loadFileHistoryData, 8000);
             } else {
                 alert("เกิดข้อผิดพลาด: รหัส Token อาจจะผิด หรือไม่มีสิทธิ์ใน Repository นี้");
                 localStorage.removeItem("github_machine_token");
@@ -195,10 +184,7 @@
 
     function fetchSavedTimeFromGithub(timeFile, elementId) {
         const token = checkToken();
-        if (!token) {
-            document.getElementById(elementId).innerText = "กรุณากรอก Token เพื่อดูเวลาอัปเดต";
-            return;
-        }
+        if (!token) return;
 
         const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${timeFile}`;
         
@@ -209,7 +195,7 @@
             }
         })
         .then(response => {
-            if (!response.ok) throw new Error("ยังไม่มีไฟล์เวลาบันทึกไว้");
+            if (!response.ok) throw new Error("ยังไม่มีไฟล์ข้อมูล");
             return response.text();
         })
         .then(timeText => {
@@ -220,74 +206,115 @@
         });
     }
 
-    // === ระบบจัดการดึงประวัติ Log และประมวลผลเป็นปฏิทินสะสมรายเดือน ===
-    function loadActionHistory() {
+    // 🌟 ฟังก์ชันใหม่: ดึงตารางเวลา (Cron) จากไฟล์ YAML ใน GitHub แล้วนำมาแปลงเป็นเวลาไทย
+    function fetchBotScheduleFromYaml(workflowFile, elementId) {
         const token = localStorage.getItem("github_machine_token");
         if (!token) return;
 
-        // อัปเดตเวลาบนหัวกล่องเว็บ
-        const currentRefreshTime = new Date().toLocaleString('th-TH');
-        document.getElementById("web-refresh-time-cal").innerText = `🔄 อัปเดตหน้าระบบ: ${currentRefreshTime}`;
-        document.getElementById("web-refresh-time-log").innerText = `🔄 อัปเดตหน้าระบบ: ${currentRefreshTime}`;
-
-        // ดึงประวัติการรันล่าสุดจาก GitHub Actions (เพิ่มความจุเป็น 60 รายการย้อนหลังเพื่อให้เห็นหลายๆ เดือน)
-        const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/actions/runs?per_page=60`;
+        const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/.github/workflows/${workflowFile}`;
 
         fetch(url, {
-            headers: { 'Authorization': `token ${token}` }
+            headers: { 
+                'Authorization': `token ${token}`,
+                'Accept': 'application/vnd.github.v3.raw'
+            }
         })
-        .then(res => res.json())
-        .then(data => {
-            if (!data.workflow_runs) return;
+        .then(response => {
+            if (!response.ok) throw new Error("ไม่พบไฟล์ YAML");
+            return response.text();
+        })
+        .then(yamlText => {
+            // ใช้ RegExp ค้นหาบรรทัดที่มีข้อความ cron: '...' หรือ cron: "..."
+            const cronMatch = yamlText.match(/cron:\s*['"]([^'"]+)['"]/);
+            if (cronMatch && cronMatch[1]) {
+                const cronExpression = cronMatch[1];
+                document.getElementById(elementId).innerText = parseCronToThaiTime(cronExpression);
+            } else {
+                document.getElementById(elementId).innerText = "ไม่ได้ตั้งเวลาอัตโนมัติไว้ (Manual Only)";
+            }
+        })
+        .catch(error => {
+            document.getElementById(elementId).innerText = "ไม่สามารถโหลดตารางเวลาได้";
+        });
+    }
 
-            const runs = data.workflow_runs;
-            const logTable = document.getElementById("history-log-table");
-            logTable.innerHTML = "";
+    // 🌟 ฟังก์ชันย่อยสำหรับแปลงรูปแบบ Cron Expression ของ GitHub (ซึ่งเป็นเวลา UTC) ให้เป็นข้อความเวลาไทย (+7 ชม.)
+    function parseCronToThaiTime(cronStr) {
+        const parts = cronStr.trim().split(/\s+/);
+        if (parts.length < 5) return cronStr;
 
-            // โครงสร้างสำหรับจัดเก็บชุดวันที่ที่สำเร็จแยกตามเดือน-ปี เพื่อนำไปทำปฏิทินหลายเดือนต่อเนื่อง
-            // โครงสร้างตัวอย่าง: {'2026-07': { sku: Set(), sales: Set() }}
-            const monthlyHistory = {};
+        const minute = parts[0];
+        const hour = parts[1];
+        const dayOfMonth = parts[2];
+        const month = parts[3];
+        const dayOfWeek = parts[4];
 
-            let hasSuccessLogs = false;
+        // แปลงเวลาจาก UTC เป็นเวลาไทย (+7 ชม.)
+        let thaiHour = parseInt(hour);
+        if (!isNaN(thaiHour)) {
+            thaiHour = (thaiHour + 7) % 24;
+            const formattedHour = String(thaiHour).padStart(2, '0');
+            const formattedMinute = String(minute).padStart(2, '0');
 
-            runs.forEach(run => {
-                // 🌟 กรองขั้นเด็ดขาด: เอาเฉพาะตัวที่ดำเนินการเสร็จสิ้น และผลลัพธ์คือ Success (สำเร็จ) จริงๆ เท่านั้น
-                if (run.status !== "completed" || run.conclusion !== "success") {
-                    return; // ไม่เอาตอนกดรันที่ค้างอยู่ หรือโปรเจกต์ที่ล้มเหลวข้ามไปเลย
-                }
+            if (dayOfWeek === '*' && dayOfMonth === '*') {
+                return `ทุกวัน เวลา ${formattedHour}:${formattedMinute} น.`;
+            }
+            return `เวลา ${formattedHour}:${formattedMinute} น. (Cron: ${cronStr})`;
+        }
+        
+        return `ตั้งเวลาไว้ (Cron: ${cronStr})`;
+    }
 
-                let botName = "บอทไม่ระบุชื่อ";
-                let botBadge = "secondary";
-                let typeKey = "";
+    function loadFileHistoryData() {
+        const token = localStorage.getItem("github_machine_token");
+        if (!token) return;
 
-                if (run.path.includes("run_sku_bot.yml")) {
-                    botName = "📦 SKU Stock Bot";
-                    botBadge = "primary";
-                    typeKey = "sku";
-                } else if (run.path.includes("run_sales_bot.yml")) {
-                    botName = "💰 Sales Bot";
-                    botBadge = "success";
-                    typeKey = "sales";
-                }
+        const currentRefreshTime = new Date().toLocaleString('th-TH');
+        document.getElementById("web-refresh-time-hub").innerText = `🔄 อัปเดตข้อมูลระบบล่าสุด: ${currentRefreshTime}`;
 
-                if (!typeKey) return; 
-                hasSuccessLogs = true;
+        const logTable = document.getElementById("history-log-table");
+        logTable.innerHTML = "";
 
-                const runDate = new Date(run.created_at);
-                const localTimeString = runDate.toLocaleString('th-TH');
+        const monthlyHistory = {};
+        const allCommits = [];
 
-                // แยกกุญแจปี-เดือน (เช่น "2026-07") และบันทึกวันที่ลง Set
-                const yearStr = runDate.getFullYear();
-                const monthStr = String(runDate.getMonth() + 1).padStart(2, '0');
+        const skuCommitsUrl = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/commits?path=sku_last_update.txt&per_page=30`;
+        const salesCommitsUrl = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/commits?path=sales_last_update.txt&per_page=30`;
+
+        const fetchOptions = { headers: { 'Authorization': `token ${token}` } };
+
+        Promise.all([
+            fetch(skuCommitsUrl, fetchOptions).then(res => res.ok ? res.json() : []),
+            fetch(salesCommitsUrl, fetchOptions).then(res => res.ok ? res.json() : [])
+        ])
+        .then(([skuCommits, salesCommits]) => {
+            skuCommits.forEach(c => { if(c.commit) allCommits.push({ type: 'sku', date: new Date(c.commit.committer.date) }); });
+            salesCommits.forEach(c => { if(c.commit) allCommits.push({ type: 'sales', date: new Date(c.commit.committer.date) }); });
+
+            allCommits.sort((a, b) => b.date - a.date);
+
+            if (allCommits.length === 0) {
+                logTable.innerHTML = `<tr><td colspan="3" class="text-center text-muted">ไม่พบข้อมูลประวัติบันทึกการเปลี่ยนแปลงของไฟล์ข้อความหลักในระบบในขณะนี้</td></tr>`;
+                renderMultipleCalendars({});
+                return;
+            }
+
+            allCommits.forEach(item => {
+                let botName = item.type === 'sku' ? "📦 SKU Stock Bot" : "💰 Sales Bot";
+                let botBadge = item.type === 'sku' ? "primary" : "success";
+
+                const localTimeString = item.date.toLocaleString('th-TH');
+
+                const yearStr = item.date.getFullYear();
+                const monthStr = String(item.date.getMonth() + 1).padStart(2, '0');
                 const yearMonthKey = `${yearStr}-${monthStr}`;
-                const dateDayStr = runDate.toISOString().split('T')[0]; // YYYY-MM-DD
+                const dateDayStr = item.date.toISOString().split('T')[0];
 
                 if (!monthlyHistory[yearMonthKey]) {
-                    monthlyHistory[yearMonthKey] = { sku: new Set(), sales: new Set(), year: yearStr, month: runDate.getMonth() };
+                    monthlyHistory[yearMonthKey] = { sku: new Set(), sales: new Set(), year: yearStr, month: item.date.getMonth() };
                 }
-                monthlyHistory[yearMonthKey][typeKey].add(dateDayStr);
+                monthlyHistory[yearMonthKey][item.type].add(dateDayStr);
 
-                // สร้างแถวตารางยืนยันความสำเร็จเข้า BigQuery
                 const row = `<tr>
                     <td><span class="badge bg-${botBadge}">${botName}</span></td>
                     <td class="small">${localTimeString}</td>
@@ -296,26 +323,21 @@
                 logTable.innerHTML += row;
             });
 
-            if (!hasSuccessLogs) {
-                logTable.innerHTML = `<tr><td colspan="3" class="text-center text-muted">ยังไม่พบข้อมูลประวัติบันทึกที่เข้า BigQuery สำเร็จในระบบคิวงานขณะนี้</td></tr>`;
-            }
-
-            // สั่งสร้างปฏิทินสะสมต่อเนื่องของทุกเดือนที่มีข้อมูล
             renderMultipleCalendars(monthlyHistory);
         })
-        .catch(err => console.error("Error fetching logs:", err));
+        .catch(err => {
+            console.error("Error tracking commits:", err);
+            logTable.innerHTML = `<tr><td colspan="3" class="text-center text-danger">เกิดข้อผิดพลาดในการโหลดประวัติไฟล์ โปรดตรวจสอบอินเทอร์เน็ตหรือ Token</td></tr>`;
+        });
     }
 
-    // === ฟังก์ชันสำหรับวาดปฏิทินสะสมย้อนหลังต่อเนื่องหลายเดือน ===
     function renderMultipleCalendars(monthlyHistory) {
         const container = document.getElementById("calendar-area");
-        container.innerHTML = ""; // ล้างข้อมูลข้อความรอโหลดออกก่อน
+        container.innerHTML = "";
 
-        // เรียงลำดับคีย์ของเดือน-ปี จากเดือนล่าสุดขึ้นก่อน หรือสามารถสลับกลับได้ตามใจชอบ
         const sortedMonths = Object.keys(monthlyHistory).sort().reverse();
 
         if (sortedMonths.length === 0) {
-            // กรณีไม่มี Log สำเร็จเลย ให้ทำปฏิทินเดือนปัจจุบันไว้เปล่าๆ รอ
             const now = new Date();
             const currentKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
             monthlyHistory[currentKey] = { sku: new Set(), sales: new Set(), year: now.getFullYear(), month: now.getMonth() };
@@ -327,7 +349,6 @@
         sortedMonths.forEach(key => {
             const data = monthlyHistory[key];
             
-            // สร้างกล่องบล็อกสำหรับปฏิทินหนึ่งเดือน
             const calBlock = document.createElement("div");
             calBlock.className = "calendar-container p-3 mb-4 bg-light border";
             
@@ -336,11 +357,9 @@
             title.innerText = `📅 ${monthNames[data.month]} ${data.year + 543}`;
             calBlock.appendChild(title);
 
-            // สร้างส่วนตารางกริด
             const grid = document.createElement("div");
             grid.className = "calendar-grid";
 
-            // ใส่หัวสัปดาห์
             const weeks = ["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"];
             weeks.forEach(w => {
                 const wh = document.createElement("div");
@@ -352,14 +371,12 @@
             const firstDayIdx = new Date(data.year, data.month, 1).getDay();
             const totalDays = new Date(data.year, data.month + 1, 0).getDate();
 
-            // ช่องว่างของวันต้นเดือน
             for (let i = 0; i < firstDayIdx; i++) {
                 const emptyCell = document.createElement("div");
                 emptyCell.className = "calendar-day empty";
                 grid.appendChild(emptyCell);
             }
 
-            // วาดวัน 1 ถึงสิ้นเดือน
             for (let day = 1; day <= totalDays; day++) {
                 const cell = document.createElement("div");
                 cell.className = "calendar-day fw-bold text-secondary small";
@@ -372,13 +389,11 @@
                 const dotsContainer = document.createElement("div");
                 dotsContainer.className = "dots-container";
 
-                // เติมจุดสีน้ำเงิน (SKU สำเร็จ)
                 if (data.sku.has(targetDateStr)) {
                     const dot = document.createElement("span");
                     dot.className = "dot dot-sku";
                     dotsContainer.appendChild(dot);
                 }
-                // เติมจุดสีเขียว (Sales สำเร็จ)
                 if (data.sales.has(targetDateStr)) {
                     const dot = document.createElement("span");
                     dot.className = "dot dot-sales";
@@ -397,7 +412,12 @@
     window.onload = function() {
         fetchSavedTimeFromGithub('sku_last_update.txt', 'sku-time');
         fetchSavedTimeFromGithub('sales_last_update.txt', 'sales-time');
-        loadActionHistory();
+        
+        // 🌟 เรียกฟังก์ชันอ่านการตั้งเวลาจากไฟล์ YAML หลังบ้านผ่าน GitHub API
+        fetchBotScheduleFromYaml('run_sku_bot.yml', 'sku-schedule');
+        fetchBotScheduleFromYaml('run_sales_bot.yml', 'sales-schedule');
+        
+        loadFileHistoryData();
     }
 </script>
 </body>
