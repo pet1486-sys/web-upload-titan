@@ -11,16 +11,19 @@
         .btn-update { width: 100%; font-weight: bold; }
         .token-management { background-color: #fff; border-radius: 8px; padding: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         
-        /* สไตล์เสริมสำหรับปฏิทิน */
-        .calendar-container { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        /* สไตล์สำหรับปฏิทิน */
+        .calendar-container { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; }
-        .calendar-header { font-weight: bold; background-color: #e9ecef; padding: 5px 0; border-radius: 4px; }
+        .calendar-header { font-weight: bold; background-color: #e9ecef; padding: 5px 0; border-radius: 4px; font-size: 0.9rem; }
         .calendar-day { padding: 10px 0; border: 1px solid #dee2e6; border-radius: 6px; min-height: 55px; position: relative; background: #fff; }
         .calendar-day.empty { background: #f8f9fa; border: none; }
         .dots-container { display: flex; justify-content: center; gap: 4px; position: absolute; bottom: 5px; left: 0; right: 0; }
         .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-        .dot-sku { background-color: #0d6efd; } /* น้ำเงิน */
-        .dot-sales { background-color: #198754; } /* เขียว */
+        .dot-sku { background-color: #0d6efd; }
+        .dot-sales { background-color: #198754; }
+        
+        /* สไตล์กำหนดความสูงของโซนปฏิทินย้อนหลัง */
+        .calendar-scroll-zone { max-height: 450px; overflow-y: auto; padding-right: 5px; }
     </style>
 </head>
 <body>
@@ -65,41 +68,50 @@
         </div>
     </div>
 
-    <!-- ส่วนใหม่ที่เพิ่มเข้ามา: แดชบอร์ดปฏิทินและประวัติ -->
+    <!-- แดชบอร์ดปฏิทินและประวัติ -->
     <div class="row g-4">
-        <!-- ฝั่งซ้าย: ปฏิทินแสดงการอัปเดตประจำเดือน -->
+        <!-- ฝั่งซ้าย: ปฏิทินแสดงการอัปเดตแบบเก็บข้อมูลต่อเนื่องย้อนหลังหลายเดือน -->
         <div class="col-lg-5">
-            <div class="calendar-container">
-                <h4 class="fw-bold mb-3 text-center" id="calendar-month-year">🗓️ ปฏิทินประวัติการอัปเดต</h4>
-                <div class="d-flex justify-content-center gap-3 mb-3 small">
+            <div class="card p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h4 class="fw-bold mb-0">🗓️ ประวัติการอัปเดตรายเดือน</h4>
+                </div>
+                <!-- 🌟 แสดงเวลาที่อัปเดตข้อมูลล่าสุดของหน้าเว็บ -->
+                <div class="text-muted small mb-3 text-end" id="web-refresh-time-cal">🔄 อัปเดตหน้าระบบ: -</div>
+                
+                <div class="d-flex justify-content-center gap-3 mb-3 small fw-bold">
                     <span><span class="dot dot-sku"></span> บอท SKU</span>
                     <span><span class="dot dot-sales"></span> บอท Sales</span>
                 </div>
-                <div class="calendar-grid" id="calendar-grid">
-                    <!-- หัวข้อวันในสัปดาห์ -->
-                    <div class="calendar-header">อา</div><div class="calendar-header">จ</div><div class="calendar-header">อ</div>
-                    <div class="calendar-header">พ</div><div class="calendar-header">พฤ</div><div class="calendar-header">ศ</div><div class="calendar-header">ส</div>
-                    <!-- วันที่จะถูก Generate ด้วย JS -->
+                
+                <!-- โซน Scroll สำหรับดูปฏิทินแต่ละเดือนที่ระบบสร้างขึ้นสะสมไว้ -->
+                <div class="calendar-scroll-zone" id="calendar-area">
+                    <p class="text-center text-muted small py-4">กำลังจัดโครงสร้างปฏิทินย้อนหลัง...</p>
                 </div>
             </div>
         </div>
 
-        <!-- ฝั่งขวา: ตารางประวัติ Log การรันย้อนหลัง -->
+        <!-- ฝั่งขวา: ตารางประวัติ Log การรันที่ส่งข้อมูลเข้า BigQuery สำเร็จเสร็จสิ้นแล้วจริงๆ -->
         <div class="col-lg-7">
-            <div class="card p-4">
-                <h4 class="fw-bold mb-3">📜 ประวัติบันทึกการรันล่าสุด (GitHub Actions Log)</h4>
-                <div class="table-responsive" style="max-height: 330px; overflow-y: auto;">
+            <div class="card p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h4 class="fw-bold mb-0">📜 บันทึกสำเร็จจริง (BigQuery Success Log)</h4>
+                </div>
+                <!-- 🌟 แสดงเวลาที่อัปเดตข้อมูลล่าสุดของหน้าเว็บ -->
+                <div class="text-muted small mb-3 text-end" id="web-refresh-time-log">🔄 อัปเดตหน้าระบบ: -</div>
+                
+                <div class="table-responsive" style="max-height: 380px; overflow-y: auto;">
                     <table class="table table-hover align-middle">
                         <thead class="table-light">
                             <tr>
                                 <th>ระบบบอท</th>
-                                <th>วัน-เวลาที่รัน</th>
-                                <th>สถานะ</th>
+                                <th>วัน-เวลาที่ส่งข้อมูลสำเร็จ</th>
+                                <th>สถานะข้อมูล</th>
                             </tr>
                         </thead>
                         <tbody id="history-log-table">
                             <tr>
-                                <td colspan="3" class="text-center text-muted">กำลังดึงข้อมูลประวัติความเคลื่อนไหว...</td>
+                                <td colspan="3" class="text-center text-muted">กำลังตรวจสอบสิทธิ์และดึงรายงานสำเร็จ...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -169,10 +181,9 @@
         })
         .then(response => {
             if (response.status === 204) {
-                alert("🚀 สั่งบอทรันสำเร็จแล้ว! กำลังส่งคำสั่งไปยัง GitHub...");
-                document.getElementById(elementId).innerText = "บอทกำลังทำงานและส่งประวัติเข้า GitHub...";
-                // โหลดประวัติและปฏิทินใหม่หลังสั่งรัน 5 วินาทีเพื่อให้สอดคล้องกับ API ล่าสุดของ GitHub
-                setTimeout(loadActionHistory, 5000);
+                alert("🚀 ส่งคำสั่งรันสำเร็จแล้ว! เมื่อบอทนำข้อมูลเข้า BigQuery สำเร็จ ประวัติจริงจะปรากฏในระบบด้านล่างครับ");
+                document.getElementById(elementId).innerText = "กำลังตรวจสอบสถานะการอัปเดตผ่าน GitHub...";
+                setTimeout(loadActionHistory, 6000); // ดีเลย์เผื่อระบบสร้างคิวงาน
             } else {
                 alert("เกิดข้อผิดพลาด: รหัส Token อาจจะผิด หรือไม่มีสิทธิ์ใน Repository นี้");
                 localStorage.removeItem("github_machine_token");
@@ -205,17 +216,22 @@
             document.getElementById(elementId).innerText = `ข้อมูลใน BigQuery ล่าสุด: ${timeText.trim()}`;
         })
         .catch(error => {
-            document.getElementById(elementId).innerText = "ยังไม่มีประวัติการอัปเดต (หรือบอทยังไม่ได้สร้างไฟล์เวลาไว้)";
+            document.getElementById(elementId).innerText = "ยังไม่มีประวัติการอัปเดตใน BigQuery";
         });
     }
 
-    // === ระบบจัดการดึงประวัติ Log และจัดลงปฏิทิน ===
+    // === ระบบจัดการดึงประวัติ Log และประมวลผลเป็นปฏิทินสะสมรายเดือน ===
     function loadActionHistory() {
         const token = localStorage.getItem("github_machine_token");
         if (!token) return;
 
-        // เรียก API ดึงประวัติการรันทั้งหมดรวมกัน 30 รายการล่าสุด
-        const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/actions/runs?per_page=30`;
+        // อัปเดตเวลาบนหัวกล่องเว็บ
+        const currentRefreshTime = new Date().toLocaleString('th-TH');
+        document.getElementById("web-refresh-time-cal").innerText = `🔄 อัปเดตหน้าระบบ: ${currentRefreshTime}`;
+        document.getElementById("web-refresh-time-log").innerText = `🔄 อัปเดตหน้าระบบ: ${currentRefreshTime}`;
+
+        // ดึงประวัติการรันล่าสุดจาก GitHub Actions (เพิ่มความจุเป็น 60 รายการย้อนหลังเพื่อให้เห็นหลายๆ เดือน)
+        const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/actions/runs?per_page=60`;
 
         fetch(url, {
             headers: { 'Authorization': `token ${token}` }
@@ -228,11 +244,18 @@
             const logTable = document.getElementById("history-log-table");
             logTable.innerHTML = "";
 
-            // ตัวแปรสำหรับเช็คการทำสีปฏิทินในแต่ละวัน
-            const historyDates = { sku: new Set(), sales: new Set() };
+            // โครงสร้างสำหรับจัดเก็บชุดวันที่ที่สำเร็จแยกตามเดือน-ปี เพื่อนำไปทำปฏิทินหลายเดือนต่อเนื่อง
+            // โครงสร้างตัวอย่าง: {'2026-07': { sku: Set(), sales: Set() }}
+            const monthlyHistory = {};
+
+            let hasSuccessLogs = false;
 
             runs.forEach(run => {
-                // แยกประเภทบอทจากชื่อไฟล์ YAML
+                // 🌟 กรองขั้นเด็ดขาด: เอาเฉพาะตัวที่ดำเนินการเสร็จสิ้น และผลลัพธ์คือ Success (สำเร็จ) จริงๆ เท่านั้น
+                if (run.status !== "completed" || run.conclusion !== "success") {
+                    return; // ไม่เอาตอนกดรันที่ค้างอยู่ หรือโปรเจกต์ที่ล้มเหลวข้ามไปเลย
+                }
+
                 let botName = "บอทไม่ระบุชื่อ";
                 let botBadge = "secondary";
                 let typeKey = "";
@@ -247,105 +270,134 @@
                     typeKey = "sales";
                 }
 
-                // แปลงเวลาเป็นเวลาท้องถิ่นไทย
+                if (!typeKey) return; 
+                hasSuccessLogs = true;
+
                 const runDate = new Date(run.created_at);
                 const localTimeString = runDate.toLocaleString('th-TH');
 
-                // บันทึกวันที่ที่บอททำงานสำเร็จ (success) เพื่อเอาไปจุดบนปฏิทิน
-                if (run.status === "completed" && run.conclusion === "success" && typeKey) {
-                    const dateStr = runDate.toISOString().split('T')[0]; // format YYYY-MM-DD
-                    historyDates[typeKey].add(dateStr);
-                }
+                // แยกกุญแจปี-เดือน (เช่น "2026-07") และบันทึกวันที่ลง Set
+                const yearStr = runDate.getFullYear();
+                const monthStr = String(runDate.getMonth() + 1).padStart(2, '0');
+                const yearMonthKey = `${yearStr}-${monthStr}`;
+                const dateDayStr = runDate.toISOString().split('T')[0]; // YYYY-MM-DD
 
-                // จัดการเรื่อง Badge สถานะ
-                let statusBadge = `<span class="badge bg-warning text-dark">กำลังทำงาน...</span>`;
-                if (run.status === "completed") {
-                    if (run.conclusion === "success") {
-                        statusBadge = `<span class="badge bg-success">สำเร็จ</span>`;
-                    } else {
-                        statusBadge = `<span class="badge bg-danger">ล้มเหลว</span>`;
-                    }
+                if (!monthlyHistory[yearMonthKey]) {
+                    monthlyHistory[yearMonthKey] = { sku: new Set(), sales: new Set(), year: yearStr, month: runDate.getMonth() };
                 }
+                monthlyHistory[yearMonthKey][typeKey].add(dateDayStr);
 
-                // Append ข้อมูลลงในตารางทีละแถว
+                // สร้างแถวตารางยืนยันความสำเร็จเข้า BigQuery
                 const row = `<tr>
                     <td><span class="badge bg-${botBadge}">${botName}</span></td>
                     <td class="small">${localTimeString}</td>
-                    <td>${statusBadge}</td>
+                    <td><span class="badge bg-success">🎉 เข้า BigQuery สำเร็จ</span></td>
                 </tr>`;
                 logTable.innerHTML += row;
             });
 
-            // เอาข้อมูลความสำเร็จไปวาดลงปฏิทินของเดือนปัจจุบัน
-            generateCalendar(historyDates);
+            if (!hasSuccessLogs) {
+                logTable.innerHTML = `<tr><td colspan="3" class="text-center text-muted">ยังไม่พบข้อมูลประวัติบันทึกที่เข้า BigQuery สำเร็จในระบบคิวงานขณะนี้</td></tr>`;
+            }
+
+            // สั่งสร้างปฏิทินสะสมต่อเนื่องของทุกเดือนที่มีข้อมูล
+            renderMultipleCalendars(monthlyHistory);
         })
-        .catch(err => console.error("Error fetching actions logs:", err));
+        .catch(err => console.error("Error fetching logs:", err));
     }
 
-    // === ฟังก์ชันวาดปฏิทินอัตโนมัติ ===
-    function generateCalendar(historyDates) {
-        const grid = document.getElementById("calendar-grid");
-        const title = document.getElementById("calendar-month-year");
-        
-        // ล้างปฏิทินเก่าออกยกเว้นส่วนหัว (อา-ส)
-        const headers = grid.querySelectorAll('.calendar-header');
-        grid.innerHTML = "";
-        headers.forEach(h => grid.appendChild(h));
+    // === ฟังก์ชันสำหรับวาดปฏิทินสะสมย้อนหลังต่อเนื่องหลายเดือน ===
+    function renderMultipleCalendars(monthlyHistory) {
+        const container = document.getElementById("calendar-area");
+        container.innerHTML = ""; // ล้างข้อมูลข้อความรอโหลดออกก่อน
 
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = now.getMonth(); // 0-11
+        // เรียงลำดับคีย์ของเดือน-ปี จากเดือนล่าสุดขึ้นก่อน หรือสามารถสลับกลับได้ตามใจชอบ
+        const sortedMonths = Object.keys(monthlyHistory).sort().reverse();
+
+        if (sortedMonths.length === 0) {
+            // กรณีไม่มี Log สำเร็จเลย ให้ทำปฏิทินเดือนปัจจุบันไว้เปล่าๆ รอ
+            const now = new Date();
+            const currentKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+            monthlyHistory[currentKey] = { sku: new Set(), sales: new Set(), year: now.getFullYear(), month: now.getMonth() };
+            sortedMonths.push(currentKey);
+        }
 
         const monthNames = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
-        title.innerText = `🗓️ ประวัติการอัปเดต (${monthNames[month]} ${year + 543})`;
 
-        // หาวันแรกของเดือนและจำนวนวันทั้งหมดในเดือนนี้
-        const firstDayIdx = new Date(year, month, 1).getDay();
-        const totalDays = new Date(year, month + 1, 0).getDate();
+        sortedMonths.forEach(key => {
+            const data = monthlyHistory[key];
+            
+            // สร้างกล่องบล็อกสำหรับปฏิทินหนึ่งเดือน
+            const calBlock = document.createElement("div");
+            calBlock.className = "calendar-container p-3 mb-4 bg-light border";
+            
+            const title = document.createElement("h5");
+            title.className = "fw-bold text-center text-dark mb-3";
+            title.innerText = `📅 ${monthNames[data.month]} ${data.year + 543}`;
+            calBlock.appendChild(title);
 
-        // เติมช่องว่างสำหรับวันก่อนหน้าวันแรกของเดือน
-        for (let i = 0; i < firstDayIdx; i++) {
-            const emptyCell = document.createElement("div");
-            emptyCell.className = "calendar-day empty";
-            grid.appendChild(emptyCell);
-        }
+            // สร้างส่วนตารางกริด
+            const grid = document.createElement("div");
+            grid.className = "calendar-grid";
 
-        // วาดวันแต่ละวันลงในปฏิทิน
-        for (let day = 1; day <= totalDays; day++) {
-            const cell = document.createElement("div");
-            cell.className = "calendar-day fw-bold text-secondary";
-            cell.innerText = day;
+            // ใส่หัวสัปดาห์
+            const weeks = ["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"];
+            weeks.forEach(w => {
+                const wh = document.createElement("div");
+                wh.className = "calendar-header";
+                wh.innerText = w;
+                grid.appendChild(wh);
+            });
 
-            // ตรวจสอบข้อมูลเพื่อจุดสี
-            const currentMonthStr = String(month + 1).padStart(2, '0');
-            const currentDayStr = String(day).padStart(2, '0');
-            const targetDateStr = `${year}-${currentMonthStr}-${currentDayStr}`;
+            const firstDayIdx = new Date(data.year, data.month, 1).getDay();
+            const totalDays = new Date(data.year, data.month + 1, 0).getDate();
 
-            const dotsContainer = document.createElement("div");
-            dotsContainer.className = "dots-container";
-
-            // ถ้าวันนั้นบอท SKU รันสำเร็จ -> เติมจุดน้ำเงิน
-            if (historyDates.sku.has(targetDateStr)) {
-                const dot = document.createElement("span");
-                dot.className = "dot dot-sku";
-                dotsContainer.appendChild(dot);
-            }
-            // ถ้าวันนั้นบอท Sales รันสำเร็จ -> เติมจุดเขียว
-            if (historyDates.sales.has(targetDateStr)) {
-                const dot = document.createElement("span");
-                dot.className = "dot dot-sales";
-                dotsContainer.appendChild(dot);
+            // ช่องว่างของวันต้นเดือน
+            for (let i = 0; i < firstDayIdx; i++) {
+                const emptyCell = document.createElement("div");
+                emptyCell.className = "calendar-day empty";
+                grid.appendChild(emptyCell);
             }
 
-            cell.appendChild(dotsContainer);
-            grid.appendChild(cell);
-        }
+            // วาดวัน 1 ถึงสิ้นเดือน
+            for (let day = 1; day <= totalDays; day++) {
+                const cell = document.createElement("div");
+                cell.className = "calendar-day fw-bold text-secondary small";
+                cell.innerText = day;
+
+                const currentMonthStr = String(data.month + 1).padStart(2, '0');
+                const currentDayStr = String(day).padStart(2, '0');
+                const targetDateStr = `${data.year}-${currentMonthStr}-${currentDayStr}`;
+
+                const dotsContainer = document.createElement("div");
+                dotsContainer.className = "dots-container";
+
+                // เติมจุดสีน้ำเงิน (SKU สำเร็จ)
+                if (data.sku.has(targetDateStr)) {
+                    const dot = document.createElement("span");
+                    dot.className = "dot dot-sku";
+                    dotsContainer.appendChild(dot);
+                }
+                // เติมจุดสีเขียว (Sales สำเร็จ)
+                if (data.sales.has(targetDateStr)) {
+                    const dot = document.createElement("span");
+                    dot.className = "dot dot-sales";
+                    dotsContainer.appendChild(dot);
+                }
+
+                cell.appendChild(dotsContainer);
+                grid.appendChild(cell);
+            }
+
+            calBlock.appendChild(grid);
+            container.appendChild(calBlock);
+        });
     }
 
     window.onload = function() {
         fetchSavedTimeFromGithub('sku_last_update.txt', 'sku-time');
         fetchSavedTimeFromGithub('sales_last_update.txt', 'sales-time');
-        loadActionHistory(); // รันดึงประวัติและสร้างปฏิทินทันทีเมื่อเปิดหน้าเว็บ
+        loadActionHistory();
     }
 </script>
 </body>
