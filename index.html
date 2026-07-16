@@ -95,8 +95,14 @@
         }
     }
 
-    // ฟังก์ชันสั่งให้ GitHub Actions ทำงานเมื่อกดปุ่ม
+    // ฟังก์ชันสั่งให้ GitHub Actions ทำงานเมื่อกดปุ่ม (เพิ่มระบบยืนยัน/ยกเลิก ป้องกันมือลั่น)
     function runBot(workflowFile, elementId, timeFile) {
+        // 🌟 ดักแก้มือลั่น: แสดงกล่องยืนยัน หากกดยกเลิกจะหยุดฟังก์ชันทันที
+        const confirmRun = confirm(`❓ คุณต้องการสั่งรันบอท (${workflowFile}) เพื่ออัปเดตข้อมูลเข้า BigQuery ใช่หรือไม่?`);
+        if (!confirmRun) {
+            return; // จบการทำงาน ไม่ส่งคำสั่งใดๆ ไปยัง GitHub
+        }
+
         const token = checkToken();
         if (!token) {
             alert("⚠️ ปฏิเสธการทำงาน: จำเป็นต้องกรอก Token ครับ");
